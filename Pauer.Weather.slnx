@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Pauer.Weather.UI/Pauer.Weather.UI.csproj" />
+  <Project Path="Pauer.Weather.Application/Pauer.Weather.Application.csproj" />
+  <Project Path="Pauer.Weather.Infrastructure/Pauer.Weather.Infrastructure.csproj" />
+</Solution>

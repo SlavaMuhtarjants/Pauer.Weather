@@ -1,0 +1,185 @@
+@page "/"
+
+@using System.Threading
+@using MediatR
+@using Pauer.Weather.Application.GetWeather
+@using Pauer.Weather.Application.GetWeather.Dto
+
+@inject ISender Sender
+@inject PersistentComponentState ApplicationState
+
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@implements IDisposable
+
+<div class="weather-page">
+    <h1 class="page-title">Weather forecast</h1>
+    @if (_isLoading)
+    {
+        <div class="state state--loading">
+            <div class="spinner" aria-hidden="true"></div>
+            <p>Loading weather…</p>
+        </div>
+    }
+    else if (_error is not null)
+    {
+        <div class="state state--error">
+            <p>@_error</p>
+            <button type="button" class="btn btn--retry" @onclick="LoadAsync">Retry</button>
+        </div>
+    }
+    else if (_weather is not null)
+    {
+        <section class="card card--current">
+            <div class="current-header">
+                <div>
+                    <h1>@_weather.CurrentWeather.LocationName</h1>
+                    <p class="date">@_weather.CurrentWeather.LocalDateTime.ToString("MMM d")</p>
+                </div>
+                <button type="button" class="btn btn--reload" @onclick="LoadAsync" aria-label="Reload weather" title="Reload weather">↻</button>
+            </div>
+
+            <div class="current-main">
+                <img src="@_weather.CurrentWeather.ConditionIconUrl" alt="@_weather.CurrentWeather.ConditionText" class="condition-icon" />
+                <span class="temperature">@FormatTemp(_weather.CurrentWeather.Temperature)</span>
+            </div>
+
+            <dl class="current-details">
+                <div class="detail">
+                    <dt>Feels</dt>
+                    <dd>@FormatTemp(_weather.CurrentWeather.FeelsLike)</dd>
+                </div>
+                <div class="detail">
+                    <dt>Humidity</dt>
+                    <dd>@_weather.CurrentWeather.HumidityPercent%</dd>
+                </div>
+                <div class="detail">
+                    <dt>Wind</dt>
+                    <dd>@_weather.CurrentWeather.WindKph.ToString("0") km/h</dd>
+                </div>
+            </dl>
+        </section>
+
+        <section class="card card--hourly">
+            <h2>Hourly</h2>
+            <div class="hourly-scroll">
+                @if (TodayHours.Any())
+                {
+                    <div class="hourly-group">
+                        <p class="hourly-group-label">Today</p>
+                        <div class="hourly-group-items">
+                            @foreach (var hour in TodayHours)
+                            {
+                                <div class="hour-chip">
+                                    <span class="hour-label">@hour.Time.ToString("HH")</span>
+                                    <img src="@hour.ConditionIconUrl" alt="" class="hour-icon" />
+                                    <span class="hour-temp">@FormatTemp(hour.Temperature)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if (TodayHours.Any() && TomorrowHours.Any())
+                {
+                    <div class="hourly-separator"></div>
+                }
+
+                @if (TomorrowHours.Any())
+                {
+                    <div class="hourly-group">
+                        <p class="hourly-group-label">Tomorrow</p>
+                        <div class="hourly-group-items">
+                            @foreach (var hour in TomorrowHours)
+                            {
+                                <div class="hour-chip">
+                                    <span class="hour-label">@hour.Time.ToString("HH")</span>
+                                    <img src="@hour.ConditionIconUrl" alt="" class="hour-icon" />
+                                    <span class="hour-temp">@FormatTemp(hour.Temperature)</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="card card--three-day">
+            <h2>3-Day Forecast</h2>
+            <div class="three-day-list">
+                @foreach (var day in _weather.Forecast.ThreeDay)
+                {
+                    <div class="three-day-row">
+                        <span class="day-label">@day.Label</span>
+                        <span class="day-min">@FormatTemp(day.MinTemp)</span>
+                        <span class="day-max">@FormatTemp(day.MaxTemp)</span>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+@code {
+    private WeatherDto? _weather;
+    private PersistingComponentStateSubscription _subscription;
+    private bool _isLoading;
+    private string? _error;
+    private CancellationTokenSource? _cts;
+
+    private IEnumerable<HourlyForecastDto> TodayHours =>
+        _weather?.Forecast.Today?.Hours ?? [];
+
+    private IEnumerable<HourlyForecastDto> TomorrowHours =>
+        _weather?.Forecast.Tomorrow?.Hours ?? [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _subscription = ApplicationState.RegisterOnPersisting(PersistData);
+        
+        if (ApplicationState.TryTakeFromJson<WeatherDto>("weatherData", out var restored))
+        {
+            _weather = restored;
+        }
+        else
+        {
+            await LoadAsync();
+        }
+    }
+    
+    private Task PersistData()
+    {
+        if (_weather is not null)
+        {
+            ApplicationState.PersistAsJson("weatherData", _weather);
+        }
+        return Task.CompletedTask;
+    }
+
+    private async Task LoadAsync()
+    {
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+
+        _isLoading = true;
+        _error = null;
+        StateHasChanged();
+
+        var result = await Sender.Send(new GetWeatherQuery(), _cts.Token);
+
+        _weather = result.IsSuccess ? result.Value : _weather;
+        _error = result.IsSuccess ? null : result.Error;
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private static string FormatTemp(double celsius) => $"{celsius:0}°";
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
+    }
+}

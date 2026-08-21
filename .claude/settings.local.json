@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/slava/Documents/Projects/Portfolio/Pauer.Weather -maxdepth 4 -type d | sort)",
+      "Bash(dotnet --version)",
+      "Bash(dotnet add *)",
+      "Bash(curl -s http://localhost:5007/app.z4z4fil66m.css -o /tmp/pauer-app.css -w \"app.css HTTP %{http_code}, size=%{size_download}\\\\n\")",
+      "Bash(curl -s http://localhost:5007/)",
+      "Bash(xargs -I{} sh -c 'echo {}; wc -l {}')",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"Pauer.Weather.UI\")",
+      "Bash(dotnet build *)",
+      "Bash(ASPNETCORE_ENVIRONMENT=Development dotnet run --urls http://localhost:5007)",
+      "Bash(echo \"started with pid $!\")",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s \"http://localhost:5007/Pauer.Weather.UI.ed2q3rbpi3.styles.css\" -w \"\\\\nHTTP %{http_code}\\\\n\")",
+      "Bash(mkdir -p /Users/slava/Documents/Projects/Portfolio/Pauer.Weather/src/Pauer.Weather.Host/Properties)",
+      "Bash(cd /Users/slava/Documents/Projects/Portfolio/Pauer.Weather && if [ -f .gitignore ]; then cat .gitignore; else echo \"No .gitignore found\"; fi)",
+      "Bash(cd /Users/slava/Documents/Projects/Portfolio/Pauer.Weather && find . -maxdepth 2 -type f -name \".gitignore\" 2>/dev/null)"
+    ]
+  }
+}

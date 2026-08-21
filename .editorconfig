@@ -1,0 +1,12 @@
+[*]
+charset = utf-8
+indent_size = 4
+insert_final_newline = false
+tab_width = 4
+trim_trailing_whitespace = false
+max_line_length = 120
+
+[*.cs]
+csharp_prefer_simple_using_statement = true
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = false
