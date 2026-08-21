@@ -10,6 +10,9 @@ A Blazor Server application that displays a weather forecast for a location defi
 - **Serilog** for structured logging
 - Testing: xUnit + FluentAssertions (planned)
 
+## Weather API usage
+http://api.weatherapi.com/v1/current.json has not been utilised because its response is already included in the response from the http://api.weatherapi.com/v1/forecast.json endpoint.
+
 ## Architecture
 
 The solution follows a layered architecture with a clear separation of concerns:
