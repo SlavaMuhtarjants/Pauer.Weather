@@ -13,13 +13,10 @@ internal sealed class WeatherService(WeatherApiHttpClient httpClient, ILogger<We
     {
         try
         {
-            var currentWeather = httpClient.GetCurrentWeatherAsync(latitude, longitude, cancellationToken);
-            var forecastWeather = httpClient.GetForecastAsync(latitude, longitude, cancellationToken);
-
-            await Task.WhenAll(currentWeather, forecastWeather)
+            var forecast = await httpClient.GetForecastAsync(latitude, longitude, cancellationToken)
                 .ConfigureAwait(false);
 
-            var dto = WeatherApiMapper.ToWeatherDto(currentWeather.Result, forecastWeather.Result);
+            var dto = WeatherApiMapper.ToWeatherDto(forecast);
 
             return Result<WeatherDto>.Success(dto);
         }

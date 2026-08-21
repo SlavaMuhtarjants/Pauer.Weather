@@ -11,19 +11,19 @@ internal static class WeatherApiMapper
     private const string HourTimeFormat = "yyyy-MM-dd HH:mm";
     private const string DateFormat = "yyyy-MM-dd";
 
-    public static WeatherDto ToWeatherDto(WeatherApiCurrentResponse current, WeatherApiForecastResponse forecast)
+    public static WeatherDto ToWeatherDto(WeatherApiForecastResponse forecast)
     {
-        var localNow = DateTime.ParseExact(current.Location.LocalTime, LocalTimeFormat, CultureInfo.InvariantCulture);
+        var localNow = DateTime.ParseExact(forecast.Location.LocalTime, LocalTimeFormat, CultureInfo.InvariantCulture);
 
         var currentWeather = new CurrentWeatherDto(
-            current.Location.Name,
+            forecast.Location.Name,
             localNow,
-            current.Current.TempC,
-            current.Current.FeelsLikeC,
-            current.Current.Humidity,
-            current.Current.WindKph,
-            current.Current.Condition.Text,
-            ToAbsoluteIconUrl(current.Current.Condition.Icon));
+            forecast.Current.TempC,
+            forecast.Current.FeelsLikeC,
+            forecast.Current.Humidity,
+            forecast.Current.WindKph,
+            forecast.Current.Condition.Text,
+            ToAbsoluteIconUrl(forecast.Current.Condition.Icon));
 
         var forecastDays = forecast.Forecast.ForecastDay;
         var todayDay = forecastDays.Count == 0 ? null : forecastDays[0];
