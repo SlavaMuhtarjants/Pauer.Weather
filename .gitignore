@@ -1,0 +1,49 @@
+## Logging
+logs/
+*.log
+
+## Build results
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+
+## Visual Studio
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Rider
+.idea/
+*.sln.iml
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+## Environment & Configuration
+.env
+.env.local
+appsettings.Development.json
+appsettings.*.json
+launchSettings.json
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Testing
+coverage/
+*.trx
+TestResults/
+
+## Build Artifacts
+publish/
+PublishProfiles/
