@@ -9,11 +9,11 @@ namespace Pauer.Weather.Infrastructure;
 
 internal sealed class WeatherService(WeatherApiHttpClient httpClient, ILogger<WeatherService> logger) : IWeatherService
 {
-    public async Task<Result<WeatherDto>> GetWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken)
+    public async Task<Result<WeatherDto>> GetWeatherAsync(Coordinates coordinates, CancellationToken cancellationToken)
     {
         try
         {
-            var forecast = await httpClient.GetForecastAsync(latitude, longitude, cancellationToken)
+            var forecast = await httpClient.GetForecastAsync(coordinates, cancellationToken)
                 .ConfigureAwait(false);
 
             var dto = WeatherApiMapper.ToWeatherDto(forecast);

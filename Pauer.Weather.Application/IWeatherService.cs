@@ -5,5 +5,5 @@ namespace Pauer.Weather.Application;
 
 public interface IWeatherService
 {
-    Task<Result<WeatherDto>> GetWeatherAsync(double latitude, double longitude, CancellationToken cancellationToken);
+    Task<Result<WeatherDto>> GetWeatherAsync(Coordinates coordinates, CancellationToken cancellationToken);
 }

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 
+using Pauer.Weather.Application.Common;
 using Pauer.Weather.Infrastructure.Configuration;
 using Pauer.Weather.Infrastructure.Contracts;
 
@@ -10,9 +11,11 @@ namespace Pauer.Weather.Infrastructure;
 
 internal sealed class WeatherApiHttpClient(HttpClient httpClient, IOptions<WeatherApiSettings> options)
 {
-    public async Task<WeatherApiForecastResponse> GetForecastAsync(double latitude, double longitude, CancellationToken cancellationToken)
+    public async Task<WeatherApiForecastResponse> GetForecastAsync(
+        Coordinates coordinates,
+        CancellationToken cancellationToken)
     {
-        var url = $"forecast.json?key={options.Value.ApiKey}&q={FormatCoordinate(latitude)},{FormatCoordinate(longitude)}&days=3";
+        var url = $"forecast.json?key={options.Value.ApiKey}&q={FormatCoordinate(coordinates.Latitude)},{FormatCoordinate(coordinates.Longitude)}&days=3";
         
         var response = await httpClient.GetFromJsonAsync<WeatherApiForecastResponse>(url, cancellationToken)
             .ConfigureAwait(false);

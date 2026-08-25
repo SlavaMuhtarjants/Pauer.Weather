@@ -14,8 +14,15 @@ public sealed class GetWeatherQueryHandler(IWeatherService weatherService, IOpti
     public async Task<Result<WeatherDto>> Handle(GetWeatherQuery request, CancellationToken cancellationToken)
     {
         var location = locationOptions.Value;
+        
+        var coordinatesResult = Coordinates.Create(location.Latitude, location.Longitude);
 
-        var response = await weatherService.GetWeatherAsync(location.Latitude, location.Longitude, cancellationToken)
+        if (!coordinatesResult.IsSuccess)
+        {
+            return Result<WeatherDto>.Failure(coordinatesResult.Error!);
+        }
+
+        var response = await weatherService.GetWeatherAsync(coordinatesResult.Value, cancellationToken)
             .ConfigureAwait(false);
 
         return response;
