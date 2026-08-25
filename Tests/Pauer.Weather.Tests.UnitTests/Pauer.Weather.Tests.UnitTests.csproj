@@ -17,8 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\Pauer.Weather.Application\Pauer.Weather.Application.csproj" />
-      <ProjectReference Include="..\..\..\Pauer.Weather.Infrastructure\Pauer.Weather.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\Pauer.Weather.Application\Pauer.Weather.Application.csproj" />
+      <ProjectReference Include="..\..\Pauer.Weather.Infrastructure\Pauer.Weather.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
