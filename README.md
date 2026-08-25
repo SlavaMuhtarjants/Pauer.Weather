@@ -52,7 +52,9 @@ Location and weather API settings are configured in `appsettings.json`:
 ## Running the Application
 
 ```bash
-dotnet run --project src/Pauer.Weather.UI
+dotnet user-secrets init --project Pauer.Weather.UI
+dotnet user-secrets set "WeatherApi:ApiKey" "YOUR_API_KEY" --project Pauer.Weather.UI
+dotnet run --project Pauer.Weather.UI 
 ```
 
 The application will start on the configured Blazor Server port and display the weather forecast for the configured location.
