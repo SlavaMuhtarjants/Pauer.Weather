@@ -15,7 +15,7 @@ http://api.weatherapi.com/v1/current.json has not been utilised because its resp
 
 ## Architecture
 
-The solution follows a layered architecture with a clear separation of concerns:
+The solution follows the Clean Architecture with a clear separation of concerns:
 
 ### Pauer.Weather.UI
 The Blazor Server web application and composition root. Configures dependency injection, registers all application services, sets up Serilog logging.
@@ -30,7 +30,7 @@ Handles integration with WeatherAPI.com.
 Absent as there are no domain types and entities.
 
 ### Architecture Rule
-The Application layer defines interfaces; Infrastructure implements them. The UI communicates with Application through MediatR only.
+The Application layer defines interfaces and the business logic in handlers; Infrastructure implements interaction with WeatherAPI service. The UI communicates with Application through MediatR only.
 
 ## Configuration
 
