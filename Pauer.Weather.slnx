@@ -2,5 +2,5 @@
   <Project Path="Pauer.Weather.UI/Pauer.Weather.UI.csproj" />
   <Project Path="Pauer.Weather.Application/Pauer.Weather.Application.csproj" />
   <Project Path="Pauer.Weather.Infrastructure/Pauer.Weather.Infrastructure.csproj" />
-  <Project Path="Tests/UnitTests/UnitTests.csproj" />
+  <Project Path="Tests\UnitTests\Pauer.Weather.Tests.UnitTests\Pauer.Weather.Tests.UnitTests.csproj" />
 </Solution>

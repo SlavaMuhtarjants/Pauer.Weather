@@ -8,7 +8,7 @@ A Blazor Server application that displays a weather forecast for a location defi
 - **Blazor Server** for the web UI
 - **MediatR** (v14.2.0)
 - **Serilog** for structured logging
-- Testing: xUnit + FluentAssertions (planned)
+- Testing: xUnit + FluentAssertions
 
 ## Weather API usage
 http://api.weatherapi.com/v1/current.json has not been utilised because its response is already included in the response from the http://api.weatherapi.com/v1/forecast.json endpoint.
@@ -59,4 +59,8 @@ The application will start on the configured Blazor Server port and display the 
 
 ## Testing
 
-A unit test project will be added under `tests/UnitTests/` using xUnit and FluentAssertions. Test naming follows the convention: `[Method]_[Scenario]_[ExpectedResult]`. Tests will cover the Application layer (handlers, validators) and critical Infrastructure logic.
+A unit test project is added under `tests/UnitTests/` using xUnit and FluentAssertions. Test naming follows the convention: `[Method]_[Scenario]_[ExpectedResult]`. Tests cover the Application layer (handlers) and Infrastructure logic.
+
+```bash
+dotnet test Pauer.Weather.slnx 
+```

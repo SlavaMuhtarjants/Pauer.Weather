@@ -8,7 +8,7 @@ using Pauer.Weather.Application.GetWeather.Dto;
 
 using Xunit;
 
-namespace UnitTests.Infrastructure;
+namespace Pauer.Weather.Tests.UnitTests.Infrastructure;
 
 public sealed class WeatherServiceTests
 {

@@ -12,7 +12,7 @@ using Pauer.Weather.Application.GetWeather.Dto;
 
 using Xunit;
 
-namespace UnitTests.Application;
+namespace Pauer.Weather.Tests.UnitTests.Application;
 
 public sealed class GetWeatherQueryHandlerTests
 {
