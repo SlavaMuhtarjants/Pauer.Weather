@@ -26,8 +26,8 @@ internal static class WeatherApiMapper
             ToAbsoluteIconUrl(forecast.Current.Condition.Icon));
 
         var forecastDays = forecast.Forecast.ForecastDay;
-        var todayDay = forecastDays.Count == 0 ? null : forecastDays[0];
-        var tomorrowDay = forecastDays.Count < 2 ? null : forecastDays[1];
+        var todayDay = forecastDays.Count == 0 ? null : forecastDays.ElementAt(0);
+        var tomorrowDay = forecastDays.Count < 2 ? null : forecastDays.ElementAt(1);
 
         var today = todayDay == null
             ? null
