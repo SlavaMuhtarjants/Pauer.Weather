@@ -8,10 +8,11 @@ This solution provides a weather forecast for the location defined in the config
 - xUnit + FluentAssertions for testing
 
 ## Application Structure
-- `src/Pauer.Weather.UI/` - Blazor app, middleware, DI configuration, user interface
-- `src/Pauer.Weather.Application/` - Requests, handlers, validators, business logic implementation
-- `src/Pauer.Weather.Infrastructure/` - Integration with Weather API, mapping to business logic DTOs
-- `tests/UnitTests/` - Application layer tests
+- `Pauer.Weather.Domain/` - Domain models, value objects, and business abstractions
+- `Pauer.Weather.Application/` - Requests, handlers, validators, business logic implementation
+- `Pauer.Weather.Infrastructure/` - Integration with Weather API, mapping to business logic DTOs
+- `Pauer.Weather.UI/` - Blazor app, middleware, DI configuration, user interface
+- `Pauer.Weather.Tests.UnitTests/` - Application layer tests
 
 ## Architecture Rules
 - Application layer defines interfaces, Infrastructure implements them
