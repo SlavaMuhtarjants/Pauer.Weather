@@ -27,7 +27,7 @@ Contains the business logic layer with MediatR queries and handlers.
 Handles integration with WeatherAPI.com.
 
 ### Pauer.Weather.Domain
-Absent as there are no domain types and entities.
+Contains core domain models, value objects (such as `Coordinates` and `ForecastDays`), and common result abstractions.
 
 ### Architecture Rule
 The Application layer defines interfaces and the business logic in handlers; Infrastructure implements interaction with WeatherAPI service. The UI communicates with Application through MediatR only.
