@@ -38,25 +38,24 @@ internal static class WeatherApiMapper
                         ParseHourTime(hour.Time) >= new DateTime(localNow.Year, localNow.Month, localNow.Day,
                             localNow.Hour, 0, 0))
                     .Select(ToHourlyForecastDto)
-                    .ToList());
+                    .ToArray());
 
         var tomorrow = tomorrowDay == null
             ? null
             : new DayForecastDto(
                 ParseDate(tomorrowDay.Date),
-                tomorrowDay.Hour.Select(ToHourlyForecastDto).ToList());
+                tomorrowDay.Hour.Select(ToHourlyForecastDto).ToArray());
 
-        var threeDay = forecastDays
-            .Take(3)
+        var allDays = forecastDays
             .Select((day, index) => new DaySummaryDto(
                 ParseDate(day.Date),
                 ToDayLabel(index, ParseDate(day.Date)),
                 day.Day.MinTempC,
                 day.Day.MaxTempC,
                 ToAbsoluteIconUrl(day.Day.Condition.Icon)))
-            .ToList();
+            .ToArray();
 
-        return new WeatherDto(currentWeather, new ForecastDto(today, tomorrow, threeDay));
+        return new WeatherDto(currentWeather, new ForecastDto(today, tomorrow, allDays));
     }
 
     private static HourlyForecastDto ToHourlyForecastDto(WeatherApiHourResponse hour) =>

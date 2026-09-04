@@ -2,9 +2,10 @@ using MediatR;
 
 using Microsoft.Extensions.Options;
 
-using Pauer.Weather.Application.Common;
 using Pauer.Weather.Application.Configuration;
 using Pauer.Weather.Application.GetWeather.Dto;
+using Pauer.Weather.Domain.Results;
+using Pauer.Weather.Domain.ValueObjects;
 
 namespace Pauer.Weather.Application.GetWeather;
 
@@ -22,7 +23,14 @@ public sealed class GetWeatherQueryHandler(IWeatherService weatherService, IOpti
             return Result<WeatherDto>.Failure(coordinatesResult.Error!);
         }
 
-        var response = await weatherService.GetWeatherAsync(coordinatesResult.Value, cancellationToken)
+        var daysResult = ForecastDays.Create(request.Days);
+        
+        if (!daysResult.IsSuccess)
+        {
+            return Result<WeatherDto>.Failure(daysResult.Error!);
+        }
+
+        var response = await weatherService.GetWeatherAsync(coordinatesResult.Value, daysResult.Value, cancellationToken)
             .ConfigureAwait(false);
 
         return response;

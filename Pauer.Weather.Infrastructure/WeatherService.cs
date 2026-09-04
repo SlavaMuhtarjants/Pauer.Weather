@@ -1,19 +1,23 @@
 using Microsoft.Extensions.Logging;
 
 using Pauer.Weather.Application;
-using Pauer.Weather.Application.Common;
 using Pauer.Weather.Application.GetWeather.Dto;
+using Pauer.Weather.Domain.Results;
+using Pauer.Weather.Domain.ValueObjects;
 using Pauer.Weather.Infrastructure.Mapping;
 
 namespace Pauer.Weather.Infrastructure;
 
 internal sealed class WeatherService(WeatherApiHttpClient httpClient, ILogger<WeatherService> logger) : IWeatherService
 {
-    public async Task<Result<WeatherDto>> GetWeatherAsync(Coordinates coordinates, CancellationToken cancellationToken)
+    public async Task<Result<WeatherDto>> GetWeatherAsync(
+        Coordinates coordinates,
+        ForecastDays forecastDays,
+        CancellationToken cancellationToken)
     {
         try
         {
-            var forecast = await httpClient.GetForecastAsync(coordinates, cancellationToken)
+            var forecast = await httpClient.GetForecastAsync(coordinates, forecastDays, cancellationToken)
                 .ConfigureAwait(false);
 
             var dto = WeatherApiMapper.ToWeatherDto(forecast);

@@ -1,4 +1,6 @@
-namespace Pauer.Weather.Application.Common;
+using Pauer.Weather.Domain.Results;
+
+namespace Pauer.Weather.Domain.ValueObjects;
 
 public record struct Coordinates
 {

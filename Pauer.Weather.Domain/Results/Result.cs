@@ -1,4 +1,4 @@
-namespace Pauer.Weather.Application.Common;
+namespace Pauer.Weather.Domain.Results;
 
 public sealed class Result<T>
 {

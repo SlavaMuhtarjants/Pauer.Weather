@@ -5,10 +5,11 @@ using Microsoft.Extensions.Options;
 using Moq;
 
 using Pauer.Weather.Application;
-using Pauer.Weather.Application.Common;
 using Pauer.Weather.Application.Configuration;
 using Pauer.Weather.Application.GetWeather;
 using Pauer.Weather.Application.GetWeather.Dto;
+using Pauer.Weather.Domain.Results;
+using Pauer.Weather.Domain.ValueObjects;
 
 using Xunit;
 
@@ -35,7 +36,35 @@ public sealed class GetWeatherQueryHandlerTests
     }
     
     [Fact]
-    public async Task HandleAsync_ValidCoordinates_ReturnsOk()
+    public async Task HandleAsync_ValidCoordinatesButInvalidDays_ReturnsError()
+    {
+        var locationOptions = Options.Create(new WeatherLocationSettings 
+        { 
+            Latitude = -56.77, 
+            Longitude = -34.73 
+        });
+        var coordinatesResult = Coordinates.Create(locationOptions.Value.Latitude, locationOptions.Value.Longitude);
+        var expected = Result<WeatherDto>.Failure("Days must be between 1 and 3.");
+        var query = new GetWeatherQuery();
+        
+        var weatherService = new Mock<IWeatherService>();
+        weatherService
+            .Setup(service => service.GetWeatherAsync(
+                coordinatesResult.Value,
+                ForecastDays.Create(query.Days).Value,
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expected);
+        
+        var handler = new GetWeatherQueryHandler(weatherService.Object, locationOptions);
+
+        var result = await handler.Handle(query, CancellationToken.None);
+        
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(expected.Error);
+    }
+    
+    [Fact]
+    public async Task HandleAsync_ValidCoordinatesAndValidDays_ReturnsOk()
     {
         var locationOptions = Options.Create(new WeatherLocationSettings 
         { 
@@ -44,15 +73,19 @@ public sealed class GetWeatherQueryHandlerTests
         });
         var coordinatesResult = Coordinates.Create(locationOptions.Value.Latitude, locationOptions.Value.Longitude);
         var expected = Result<WeatherDto>.Success(It.IsAny<WeatherDto>());
+        var query = new GetWeatherQuery(1);
         
         var weatherService = new Mock<IWeatherService>();
         weatherService
-            .Setup(service => service.GetWeatherAsync(coordinatesResult.Value, It.IsAny<CancellationToken>()))
+            .Setup(service => service.GetWeatherAsync(
+                coordinatesResult.Value,
+                ForecastDays.Create(query.Days).Value,
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         
         var handler = new GetWeatherQueryHandler(weatherService.Object, locationOptions);
 
-        var result = await handler.Handle(new GetWeatherQuery(), CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
         
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(expected.Value);
