@@ -34,6 +34,95 @@
     letter-spacing: 0.04em;
 }
 
+/* Location picker card */
+.card--location {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #e5e8eb;
+    border-radius: 10px;
+    background: #f7f8fa;
+    font: inherit;
+    color: #1c1e21;
+}
+
+.input:focus {
+    outline: none;
+    border-color: #2f80ed;
+    background: #ffffff;
+}
+
+.field-hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.field-hint--error {
+    color: #b32121;
+}
+
+.suggestions {
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    border: 1px solid #eef0f2;
+    border-radius: 10px;
+}
+
+.suggestions li + li {
+    border-top: 1px solid #eef0f2;
+}
+
+.suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: none;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.suggestion:hover,
+.suggestion:focus-visible {
+    background: #f1f3f5;
+    outline: none;
+}
+
+.suggestion-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.suggestion-detail {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
 /* Current weather card */
 .current-header {
     display: flex;

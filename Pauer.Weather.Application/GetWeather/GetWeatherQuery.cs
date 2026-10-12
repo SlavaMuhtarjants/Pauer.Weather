@@ -5,4 +5,4 @@ using Pauer.Weather.Domain.Results;
 
 namespace Pauer.Weather.Application.GetWeather;
 
-public sealed record GetWeatherQuery(int Days = 3) : IRequest<Result<WeatherDto>>;
+public sealed record GetWeatherQuery(double Latitude, double Longitude, int Days = 3) : IRequest<Result<WeatherDto>>;

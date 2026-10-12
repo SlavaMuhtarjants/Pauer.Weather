@@ -2,11 +2,14 @@
 
 @using System.Threading
 @using MediatR
+@using Pauer.Weather.Application.Cities
+@using Pauer.Weather.Application.Cities.Dto
+@using Pauer.Weather.Application.Countries
+@using Pauer.Weather.Application.Countries.Dto
 @using Pauer.Weather.Application.GetWeather
 @using Pauer.Weather.Application.GetWeather.Dto
 
 @inject ISender Sender
-@inject PersistentComponentState ApplicationState
 
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
@@ -14,6 +17,64 @@
 
 <div class="weather-page">
     <h1 class="page-title">Weather forecast</h1>
+
+    <section class="card card--location">
+        <h2>Location</h2>
+
+        <div class="field">
+            <label for="country-select">Country</label>
+            <select id="country-select" class="input" value="@_selectedCountryId" @onchange="OnCountryChanged">
+                <option value="">— select a country —</option>
+                @foreach (var country in _countries)
+                {
+                    <option value="@country.Id">@country.Name</option>
+                }
+            </select>
+            @if (_countriesError is not null)
+            {
+                <p class="field-hint field-hint--error">@_countriesError</p>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(_selectedCountryId))
+        {
+            <div class="field">
+                <label for="city-input">Town / city</label>
+                <input id="city-input" class="input" type="text" autocomplete="off"
+                       placeholder="Type at least @MinQueryLength characters…"
+                       value="@_cityQuery" @oninput="OnCityQueryChangedAsync" />
+
+                @if (_isSearching)
+                {
+                    <p class="field-hint">Searching…</p>
+                }
+                else if (_searchError is not null)
+                {
+                    <p class="field-hint field-hint--error">@_searchError</p>
+                }
+                else if (_noMatches)
+                {
+                    <p class="field-hint">No towns or cities found.</p>
+                }
+
+                @if (_suggestions.Count > 0)
+                {
+                    <ul class="suggestions">
+                        @foreach (var city in _suggestions)
+                        {
+                            <li>
+                                <button type="button" class="suggestion" @onclick="() => SelectCityAsync(city)">
+                                    <span class="suggestion-name">@city.Name</span>
+                                    <span class="suggestion-detail">@city.FullName</span>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+    </section>
+
     @if (_isLoading)
     {
         <div class="state state--loading">
@@ -121,11 +182,29 @@
 </div>
 
 @code {
+    private const int MinQueryLength = 4;
+
+    private static readonly TimeSpan SearchDelay = TimeSpan.FromMilliseconds(500);
+
+    private IReadOnlyCollection<CountryDto> _countries = [];
+    private IReadOnlyCollection<CityDto> _suggestions = [];
+    private string? _countriesError;
+
+    private string _selectedCountryId = string.Empty;
+    private string _cityQuery = string.Empty;
+    private CityDto? _selectedCity;
+    private bool _isSearching;
+    private bool _noMatches;
+    private string? _searchError;
+
     private WeatherDto? _weather;
-    private PersistingComponentStateSubscription _subscription;
     private bool _isLoading;
     private string? _error;
-    private CancellationTokenSource? _cts;
+
+    private readonly CancellationTokenSource _lifetimeCts = new();
+
+    private CancellationTokenSource? _weatherCts;
+    private CancellationTokenSource? _searchCts;
 
     private IEnumerable<HourlyForecastDto> TodayHours =>
         _weather?.Forecast.Today?.Hours ?? [];
@@ -135,51 +214,169 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _subscription = ApplicationState.RegisterOnPersisting(PersistData);
-        
-        if (ApplicationState.TryTakeFromJson<WeatherDto>("weatherData", out var restored))
+        try
         {
-            _weather = restored;
+            var result = await Sender.Send(new GetCountriesQuery(), _lifetimeCts.Token);
+
+            _countries = result.IsSuccess ? result.Value ?? [] : [];
+            _countriesError = result.IsSuccess ? null : result.Error;
         }
-        else
+        catch (OperationCanceledException)
         {
-            await LoadAsync();
+            // The user navigated away while the country list was loading.
         }
     }
-    
-    private Task PersistData()
+
+    private void OnCountryChanged(ChangeEventArgs args)
     {
-        if (_weather is not null)
+        _selectedCountryId = args.Value?.ToString() ?? string.Empty;
+
+        CancelSearch();
+        CancelWeather();
+
+        _cityQuery = string.Empty;
+        _suggestions = [];
+        _selectedCity = null;
+        _isSearching = false;
+        _noMatches = false;
+        _searchError = null;
+        _weather = null;
+        _error = null;
+        _isLoading = false;
+    }
+
+    private async Task OnCityQueryChangedAsync(ChangeEventArgs args)
+    {
+        _cityQuery = args.Value?.ToString() ?? string.Empty;
+        _suggestions = [];
+        _isSearching = false;
+        _noMatches = false;
+        _searchError = null;
+
+        CancelSearch();
+
+        var searchTerm = _cityQuery.Trim();
+
+        if (searchTerm.Length < MinQueryLength)
         {
-            ApplicationState.PersistAsJson("weatherData", _weather);
+            return;
         }
-        return Task.CompletedTask;
+
+        _searchCts = new CancellationTokenSource();
+        var cancellationToken = _searchCts.Token;
+
+        try
+        {
+            // Debounce: only the keystroke the user pauses after reaches the geo API.
+            await Task.Delay(SearchDelay, cancellationToken);
+
+            _isSearching = true;
+            StateHasChanged();
+
+            var result = await Sender.Send(new SearchCitiesQuery(_selectedCountryId, searchTerm), cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            _suggestions = result.IsSuccess ? result.Value ?? [] : [];
+            _searchError = result.IsSuccess ? null : result.Error;
+            _noMatches = result.IsSuccess && _suggestions.Count == 0;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                _isSearching = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SelectCityAsync(CityDto city)
+    {
+        CancelSearch();
+
+        _selectedCity = city;
+        _cityQuery = city.Name;
+        _suggestions = [];
+        _isSearching = false;
+        _noMatches = false;
+        _searchError = null;
+
+        await LoadAsync();
     }
 
     private async Task LoadAsync()
     {
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _cts = new CancellationTokenSource();
+        if (_selectedCity is null)
+        {
+            return;
+        }
+
+        CancelWeather();
+
+        _weatherCts = new CancellationTokenSource();
+        var cancellationToken = _weatherCts.Token;
 
         _isLoading = true;
         _error = null;
         StateHasChanged();
 
-        var result = await Sender.Send(new GetWeatherQuery(), _cts.Token);
+        try
+        {
+            var query = new GetWeatherQuery(_selectedCity.Latitude, _selectedCity.Longitude);
+            var result = await Sender.Send(query, cancellationToken);
 
-        _weather = result.IsSuccess ? result.Value : _weather;
-        _error = result.IsSuccess ? null : result.Error;
-        _isLoading = false;
-        StateHasChanged();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            _weather = result.IsSuccess ? result.Value : _weather;
+            _error = result.IsSuccess ? null : result.Error;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        finally
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private void CancelSearch()
+    {
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
+        _searchCts = null;
+    }
+
+    private void CancelWeather()
+    {
+        _weatherCts?.Cancel();
+        _weatherCts?.Dispose();
+        _weatherCts = null;
     }
 
     private static string FormatTemp(double celsius) => $"{celsius:0}°";
 
     public void Dispose()
     {
-        _subscription.Dispose();
-        _cts?.Cancel();
-        _cts?.Dispose();
+        _lifetimeCts.Cancel();
+        _lifetimeCts.Dispose();
+
+        CancelSearch();
+        CancelWeather();
     }
 }
