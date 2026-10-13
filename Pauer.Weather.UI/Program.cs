@@ -25,7 +25,7 @@ try
     var app = builder.Build();
 
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    
+
     if (!app.Environment.IsDevelopment())
     {
         app.UseHsts();

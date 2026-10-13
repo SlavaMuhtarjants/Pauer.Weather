@@ -35,7 +35,7 @@ internal sealed class WeatherService(WeatherApiHttpClient httpClient, ILogger<We
             {
                 logger.LogWarning(exception, exception.Message);
             }
-            
+
             return Result<WeatherDto>.Failure("Failed to retrieve weather data.");
         }
     }

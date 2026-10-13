@@ -19,12 +19,22 @@ This solution provides a weather forecast for the location defined in the config
 - Application layer must not reference Infrastructure
 - Use MediatR for application use cases. Blazor components must communicate through MediatR, not directly with Infrastructure.
 
+## Code Conventions
+- Positional records for request/response DTOs
+- File-scoped namespaces
+- Primary constructors for dependency injection
+- Sealed classes for implementations
+- Internal by default, public only for contracts
+
 ### Patterns We Use
 - Primary constructors for DI
 - Records for DTOs
 - Perfer sealed classes
 - Result<T> pattern for error handling (no exceptions for flow control)
 - Always pass CancellationToken to async methods
+- 
+## Patterns We Do NOT Use
+- AutoMapper or any mapping library
 
 ## Testing
 - Unit tests: Application logic and handlers

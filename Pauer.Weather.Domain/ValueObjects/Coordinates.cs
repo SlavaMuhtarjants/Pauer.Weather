@@ -6,7 +6,7 @@ public record struct Coordinates
 {
     public double Latitude { get; private set; }
     public double Longitude { get; private set; }
-    
+
     public static Result<Coordinates> Create(double latitude, double longitude)
     {
         if (latitude is < -90 or > 90)

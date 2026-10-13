@@ -24,7 +24,7 @@ public sealed class WeatherServiceTests
         _weatherService
             .Setup(service => service.GetWeatherAsync(coordinates, _forecastDays, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
-        
+
         var result = await _weatherService.Object.GetWeatherAsync(coordinates, _forecastDays, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
